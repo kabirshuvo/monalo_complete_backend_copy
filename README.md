@@ -47,3 +47,32 @@ Example (server API):
 
 This keeps the API robust, avoids server errors from malformed input, and provides
 clear validation messages for clients and buyers integrating with the API.
+
+[![CI](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)](https://github.com/<owner>/<repo>/actions/workflows/ci.yml)
+
+## CI & Code Quality
+
+This repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` that runs on `push` and
+`pull_request`. The CI job executes:
+
+- `npm ci` to install dependencies
+- `npm run lint` to enforce ESLint rules
+- `npx tsc --noEmit` for TypeScript type checks
+- `npm run build` to run the Next.js build
+- `npx prisma generate` and `npx prisma migrate status` to validate Prisma schema and client
+
+Notes:
+- The `prisma migrate status` step may require a `DATABASE_URL` secret in GitHub if you want migration
+    status checks against a live database. The step does not perform writes; it only reports migration status.
+- CI will fail the workflow on TypeScript errors, ESLint errors, build failures, or Prisma/schema issues.
+
+Run checks locally:
+
+```bash
+npm ci
+npm run lint
+npx tsc --noEmit
+npm run build
+npx prisma generate --schema=prisma/schema.prisma
+```
+
