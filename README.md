@@ -3,7 +3,7 @@ Fully Implemented:
 
 Authentication system (NextAuth with credentials, registration, session management)
 Database schema (15+ models: User, Product, Course, Blog, Order, etc.)
-RBAC system (4 roles: CUSTOMER, LEARNER, WRITER, ADMIN)
+RBAC system (5 roles: CUSTOMER, LEARNER, WRITER, ADMIN, SELLER)
 Audit logging and soft delete
 API route structure
 Middleware for auth protection
@@ -25,3 +25,25 @@ Implement a specific dashboard (which role)?
 Build out the homepage and public pages?
 Set up a specific feature (shop, courses, or blog)?
 What would you like to tackle first?
+
+## Input Validation Pattern (Zod)
+
+This project uses Zod for server-side input validation to ensure all incoming data is
+validated before it reaches business logic or the database. Validation is kept server-only
+and follows a small, repeatable pattern:
+
+- **Schema files:** Place Zod schemas in `lib/validation/` (e.g. `auth.schema.ts`, `product.schema.ts`).
+- **Standard response shape:** Use `lib/validation/base-response.ts` to return `{ success, data, error }`.
+- **Server-only usage:** Import and run `schema.safeParse()` (or `parse()`) inside API routes, server actions,
+  and authentication handlers before any database writes.
+- **Error handling:** Catch `ZodError` and return a `400` with a structured error payload.
+
+Example (server API):
+
+1. Parse the request body.
+2. `const parsed = schema.safeParse(body)`.
+3. If invalid, return `errorResponse({ message: 'Invalid input', issues: parsed.error.errors })` with `400`.
+4. If valid, continue with DB writes; respond with `successResponse(data)`.
+
+This keeps the API robust, avoids server errors from malformed input, and provides
+clear validation messages for clients and buyers integrating with the API.
