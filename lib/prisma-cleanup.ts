@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { logger } from './logger'
 
 /**
  * Set up graceful Prisma client shutdown with signal handlers
@@ -13,13 +14,13 @@ export function setupPrismaShutdown(
     logger?: { log: (msg: string) => void; error: (msg: string) => void }
   } = {}
 ) {
-  const logger = options.logger || {
-    log: (msg: string) => console.log(msg),
-    error: (msg: string) => console.error(msg),
+  const loggerImpl = options.logger || {
+    log: (msg: string) => logger.info(msg),
+    error: (msg: string) => logger.error(msg),
   }
 
   const shutdown = async (signal: string) => {
-    logger.log(`\n🛑 Received ${signal}, shutting down gracefully...`)
+    loggerImpl.log(`\n🛑 Received ${signal}, shutting down gracefully...`)
 
     try {
       // Run custom cleanup if provided
@@ -29,11 +30,11 @@ export function setupPrismaShutdown(
 
       // Disconnect Prisma
       await prisma.$disconnect()
-      logger.log('✓ Prisma disconnected successfully')
+      loggerImpl.log('✓ Prisma disconnected successfully')
       process.exit(0)
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error'
-      logger.error(`✗ Error during shutdown: ${message}`)
+      loggerImpl.error(`✗ Error during shutdown: ${message}`)
       process.exit(1)
     }
   }
@@ -44,15 +45,15 @@ export function setupPrismaShutdown(
 
   // Handle uncaught exceptions
   process.on('uncaughtException', async (err: Error) => {
-    logger.error(`✗ Uncaught Exception: ${err.message}`)
-    logger.error(err.stack || '')
+    loggerImpl.error(`✗ Uncaught Exception: ${err.message}`)
+    loggerImpl.error(err.stack || '')
     await shutdown('uncaughtException')
   })
 
   // Handle unhandled promise rejections
   process.on('unhandledRejection', async (reason: unknown) => {
     const message = reason instanceof Error ? reason.message : String(reason)
-    logger.error(`✗ Unhandled Rejection: ${message}`)
+    loggerImpl.error(`✗ Unhandled Rejection: ${message}`)
     await shutdown('unhandledRejection')
   })
 }
@@ -66,7 +67,7 @@ export async function disconnectPrisma(prisma: PrismaClient): Promise<void> {
     await prisma.$disconnect()
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    console.error(`Error disconnecting Prisma: ${message}`)
+    logger.error(`Error disconnecting Prisma: ${message}`)
     throw err
   }
 }

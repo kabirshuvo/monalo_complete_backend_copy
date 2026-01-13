@@ -1,22 +1,23 @@
 import { PrismaClient } from '@prisma/client'
 import { hashPassword } from '../lib/auth-helpers'
 import { setupPrismaShutdown } from '../lib/prisma-cleanup'
+import { logger } from '../lib/logger'
 
 const prisma = new PrismaClient()
 
 // Set up graceful shutdown handlers
 setupPrismaShutdown(prisma, {
   logger: {
-    log: (msg: string) => console.log(msg),
-    error: (msg: string) => console.error(msg),
+    log: (msg: string) => logger.info(msg),
+    error: (msg: string) => logger.error(msg),
   },
 })
 
 async function main() {
-  console.log('🌱 Starting database seed...')
+  logger.info('🌱 Starting database seed...')
 
   // ============= Create Users =============
-  console.log('\n📝 Creating users...')
+  logger.info('\n📝 Creating users...')
 
   const adminPassword = await hashPassword('admin123')
   const admin = await prisma.user.upsert({
@@ -32,7 +33,7 @@ async function main() {
       points: 5000,
     },
   })
-  console.log(`✓ Admin user: ${admin.email}`)
+  logger.info(`✓ Admin user: ${admin.email}`)
 
   const customerPassword = await hashPassword('customer123')
   const customer = await prisma.user.upsert({
@@ -48,7 +49,7 @@ async function main() {
       points: 120,
     },
   })
-  console.log(`✓ Customer user: ${customer.email}`)
+  logger.info(`✓ Customer user: ${customer.email}`)
 
   const learnerPassword = await hashPassword('learner123')
   const learner = await prisma.user.upsert({
@@ -64,10 +65,10 @@ async function main() {
       points: 250,
     },
   })
-  console.log(`✓ Learner user: ${learner.email}`)
+  logger.info(`✓ Learner user: ${learner.email}`)
 
   // ============= Create Courses =============
-  console.log('\n🎓 Creating courses...')
+  logger.info('\n🎓 Creating courses...')
 
   const freeCourse = await prisma.course.upsert({
     where: { id: 'course-free-intro' },
@@ -110,7 +111,7 @@ async function main() {
       `,
     },
   })
-  console.log(`✓ Free course: "${freeCourse.title}"`)
+  logger.info(`✓ Free course: "${freeCourse.title}"`)
 
   const paidCourse = await prisma.course.upsert({
     where: { id: 'course-paid-advanced' },
@@ -161,10 +162,10 @@ async function main() {
       `,
     },
   })
-  console.log(`✓ Paid course: "${paidCourse.title}"`)
+  logger.info(`✓ Paid course: "${paidCourse.title}"`)
 
   // ============= Create Products =============
-  console.log('\n🛍️  Creating shop products...')
+  logger.info('\n🛍️  Creating shop products...')
 
   const product1 = await prisma.product.upsert({
     where: { id: 'product-nextjs-handbook' },
@@ -181,7 +182,7 @@ async function main() {
       imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134ef2944f1?w=400&h=400&fit=crop',
     },
   })
-  console.log(`✓ Product 1: "${product1.name}" - $${(product1.price / 100).toFixed(2)}`)
+  logger.info(`✓ Product 1: "${product1.name}" - $${(product1.price / 100).toFixed(2)}`)
 
   const product2 = await prisma.product.upsert({
     where: { id: 'product-typescript-course' },
@@ -198,7 +199,7 @@ async function main() {
       imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop',
     },
   })
-  console.log(`✓ Product 2: "${product2.name}" - $${(product2.price / 100).toFixed(2)}`)
+  logger.info(`✓ Product 2: "${product2.name}" - $${(product2.price / 100).toFixed(2)}`)
 
   const product3 = await prisma.product.upsert({
     where: { id: 'product-devtools-bundle' },
@@ -215,10 +216,10 @@ async function main() {
       imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=400&fit=crop',
     },
   })
-  console.log(`✓ Product 3: "${product3.name}" - $${(product3.price / 100).toFixed(2)}`)
+  logger.info(`✓ Product 3: "${product3.name}" - $${(product3.price / 100).toFixed(2)}`)
 
   // ============= Create Points Rules =============
-  console.log('\n⭐ Creating points rules...')
+  logger.info('\n⭐ Creating points rules...')
 
   const pointsRules = [
     { id: 'rule-signup', action: 'signup', points: 100 },
@@ -235,27 +236,27 @@ async function main() {
       create: rule,
     })
   }
-  console.log(`✓ Created ${pointsRules.length} points rules`)
+  logger.info(`✓ Created ${pointsRules.length} points rules`)
 
   // ============= Summary =============
-  console.log('\n✅ Seed completed successfully!')
-  console.log('\n📊 Summary:')
-  console.log(`  - Users: 3 (1 Admin, 1 Customer, 1 Learner)`)
-  console.log(`  - Courses: 2 (1 Free, 1 Paid)`)
-  console.log(`  - Products: 3`)
-  console.log(`  - Points Rules: ${pointsRules.length}`)
-  console.log('\n🔐 Test Credentials:')
-  console.log('  Admin: admin@example.com / admin123')
-  console.log('  Customer: customer@example.com / customer123')
-  console.log('  Learner: learner@example.com / learner123')
+  logger.info('\n✅ Seed completed successfully!')
+  logger.info('\n📊 Summary:')
+  logger.info(`  - Users: 3 (1 Admin, 1 Customer, 1 Learner)`) 
+  logger.info(`  - Courses: 2 (1 Free, 1 Paid)`) 
+  logger.info(`  - Products: 3`) 
+  logger.info(`  - Points Rules: ${pointsRules.length}`)
+  logger.info('\n🔐 Test Credentials:')
+  logger.info('  Admin: admin@example.com / admin123')
+  logger.info('  Customer: customer@example.com / customer123')
+  logger.info('  Learner: learner@example.com / learner123')
 }
 
 main()
   .catch((err: unknown) => {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    console.error('🔴 Seed failed:', message)
+    logger.error('🔴 Seed failed:', message)
     if (err instanceof Error && err.stack) {
-      console.error(err.stack)
+      logger.error(err.stack)
     }
     process.exit(1)
   })

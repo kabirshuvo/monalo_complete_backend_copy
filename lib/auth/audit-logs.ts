@@ -79,12 +79,12 @@ export async function logAccessDenied(entry: AccessLogEntry): Promise<void> {
       data: logEntry,
     })
 
-    console.log(`[Audit] Access denied - User: ${entry.userId}, Route: ${entry.route}`)
+      logger.info(`[Audit] Access denied - User: ${entry.userId}, Route: ${entry.route}`)
   } catch (error) {
     // Failure-safe: Log error but don't throw
     // This prevents broken logging from breaking security
     const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error(`[Audit] Failed to log access denial: ${message}`)
+      logger.error(`[Audit] Failed to log access denial: ${message}`)
     // Don't throw - logging failure should not block the application
   }
 }
@@ -121,10 +121,10 @@ export async function logAccessAllowed(entry: AccessLogEntry): Promise<void> {
       data: logEntry,
     })
 
-    console.log(`[Audit] Access allowed - User: ${entry.userId}, Route: ${entry.route}`)
+      logger.info(`[Audit] Access allowed - User: ${entry.userId}, Route: ${entry.route}`)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error(`[Audit] Failed to log access allowed: ${message}`)
+      logger.error(`[Audit] Failed to log access allowed: ${message}`)
   }
 }
 
@@ -151,10 +151,10 @@ export async function logAuthFailure(entry: Omit<AccessLogEntry, 'userRole'>): P
       data: logEntry,
     })
 
-    console.log(`[Audit] Auth failure - User: ${entry.userId}, Route: ${entry.route}`)
+      logger.info(`[Audit] Auth failure - User: ${entry.userId}, Route: ${entry.route}`)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error(`[Audit] Failed to log auth failure: ${message}`)
+      logger.error(`[Audit] Failed to log auth failure: ${message}`)
   }
 }
 
@@ -188,12 +188,12 @@ export async function logRoleValidationFailure(
       data: logEntry,
     })
 
-    console.log(
-      `[Audit] Role validation failed - User: ${entry.userId}, Role: ${entry.userRole}`
-    )
+      logger.info(
+        `[Audit] Role validation failed - User: ${entry.userId}, Role: ${entry.userRole}`
+      )
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error(`[Audit] Failed to log role validation failure: ${message}`)
+      logger.error(`[Audit] Failed to log role validation failure: ${message}`)
   }
 }
 
@@ -224,10 +224,10 @@ export async function logFeatureDenied(entry: AccessLogEntry & { feature?: strin
       data: logEntry,
     })
 
-    console.log(`[Audit] Feature denied - User: ${entry.userId}, Feature: ${entry.feature}`)
+      logger.info(`[Audit] Feature denied - User: ${entry.userId}, Feature: ${entry.feature}`)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error(`[Audit] Failed to log feature denial: ${message}`)
+      logger.error(`[Audit] Failed to log feature denial: ${message}`)
   }
 }
 
@@ -270,7 +270,7 @@ export async function getAccessDenialLogs(
 
     return logs
   } catch (error) {
-    console.error('[Audit] Failed to retrieve access denial logs:', error)
+      logger.error('[Audit] Failed to retrieve access denial logs:', error)
     return []
   }
 }
@@ -313,7 +313,7 @@ export async function getAccessDenialsByRole(
 
     return logs
   } catch (error) {
-    console.error('[Audit] Failed to retrieve access denials by role:', error)
+      logger.error('[Audit] Failed to retrieve access denials by role:', error)
     return []
   }
 }
@@ -354,7 +354,7 @@ export async function getAccessDenialsByRoute(
 
     return logs
   } catch (error) {
-    console.error('[Audit] Failed to retrieve access denials by route:', error)
+      logger.error('[Audit] Failed to retrieve access denials by route:', error)
     return []
   }
 }
@@ -427,7 +427,7 @@ export async function getAccessDenialSummary(options?: {
       topDeniedRoles,
     }
   } catch (error) {
-    console.error('[Audit] Failed to generate access denial summary:', error)
+      logger.error('[Audit] Failed to generate access denial summary:', error)
     return {
       totalDenials: 0,
       denialsByRole: {},

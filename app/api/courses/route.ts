@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireRole, AuthorizationError } from '@/lib/auth/role'
 import { prisma } from '@/lib/db'
 import { withCreatedBy } from '@/lib/auth/audit'
+import { logger } from '@/lib/logger'
 
 /**
  * GET /api/courses
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(courses)
   } catch (error) {
-    console.error('[GET /api/courses] Error:', error)
+    logger.error('[GET /api/courses] Error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch courses' },
       { status: 500 }
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log(`[POST /api/courses] Course created: ${course.id} by ${userId}`)
+    logger.info(`[POST /api/courses] Course created: ${course.id} by ${userId}`)
 
     return NextResponse.json(course, { status: 201 })
   } catch (error) {
@@ -130,7 +131,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle unexpected errors
-    console.error('[POST /api/courses] Error:', error)
+    logger.error('[POST /api/courses] Error:', error)
     return NextResponse.json(
       { error: 'Failed to create course' },
       { status: 500 }

@@ -34,6 +34,7 @@
 
 import { getToken } from 'next-auth/jwt'
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 import type { JWT } from 'next-auth/jwt'
 
 /**
@@ -77,7 +78,7 @@ export async function middleware(request: NextRequest) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('callbackUrl', pathname)
     
-    console.log(`[Middleware] Unauthenticated access to ${pathname}, redirecting to login`)
+    logger.info(`[Middleware] Unauthenticated access to ${pathname}, redirecting to login`)
     return NextResponse.redirect(loginUrl)
   }
 
@@ -93,7 +94,7 @@ export async function middleware(request: NextRequest) {
    * 
    * This ensures role cannot be spoofed via JWT manipulation
    */
-  console.log(`[Middleware] Authenticated request to ${pathname}, user: ${token.sub}`)
+  logger.info(`[Middleware] Authenticated request to ${pathname}, user: ${token.sub}`)
   return NextResponse.next()
 }
 
